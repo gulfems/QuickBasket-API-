@@ -1,0 +1,31 @@
+{
+  "name": "quickbasket-api",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "mocha --recursive --exit",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.22.2",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.0",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "chai": "^6.2.2",
+    "eslint": "^10.10.0",
+    "mocha": "^12.0.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.9.6",
+    "supertest": "^7.2.2"
+  }
+}
