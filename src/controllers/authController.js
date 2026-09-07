@@ -49,7 +49,7 @@ export const loginUser = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password', status: 401 });
         }
 
-        jwt.sign({ id: user.id, email: user.email, is_admin :user.is_admin }, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
+        jwt.sign({ id: user.id, email: user.email, is_admin: user.is_admin, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
             if (err) {
                 console.error('Error generating JWT:', err);
                 return res.status(500).json({ message: 'Internal server error', status: 500 });
@@ -61,7 +61,7 @@ export const loginUser = async (req, res) => {
         console.error('Error logging in user:', error);
         return res.status(500).json({ message: 'Internal server error', status: 500 });
     }
-}   
+}
 
 export const getMe = async (req, res) => {
     const userId = req.user.id;
@@ -76,4 +76,4 @@ export const getMe = async (req, res) => {
         console.log(error);
         return res.status(500).json({ message: 'Internal server error', status: 500 });
     }
-    }
+}

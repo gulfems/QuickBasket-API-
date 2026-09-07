@@ -48,7 +48,7 @@ export const loginCourier = async (req, res) => {
             return res.status(401).json({ message: 'Invalid email or password', status: 401 });
         }
 
-        jwt.sign({ id: courrier.id, email: courrier.email }, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
+        jwt.sign({ id: courrier.id, email: courrier.email, role: 'courier' }, process.env.JWT_SECRET, { expiresIn: '7d' }, (err, token) => {
             if (err) {
                 console.error('Error generating JWT:', err);
                 return res.status(500).json({ message: 'Internal server error', status: 500 });
