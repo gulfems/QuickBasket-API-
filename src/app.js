@@ -7,6 +7,7 @@ import categoryRoutes from "./routes/categoryRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import addressRoutes from "./routes/addressRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 
 const app = express();
 
@@ -24,7 +25,8 @@ app.use("/api/courier", courierRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/addresses", addressRoutes)
+app.use("/api/addresses", addressRoutes);
+app.use("/api/cart", cartRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
