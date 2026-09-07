@@ -60,3 +60,19 @@ export const loginCourier = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error', status: 500 });
     }
 }
+
+export const getMeC = async (req, res) => {
+    const courierId = req.user.id;
+
+    try {
+        const courierResult = await pool.query('SELECT id, email, phone, created_at FROM couriers WHERE id = $1', [courierId]);
+        if (courierResult.rows.length === 0) {
+            return res.status(404).json({ message: 'Courier not found', status: 404 });
+
+        }
+        res.status(200).json({ courier: courierResult.rows[0] });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
