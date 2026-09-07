@@ -7,9 +7,6 @@ DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS addresses CASCADE;
 DROP TABLE IF EXISTS couriers CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
-
-
-
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -18,7 +15,6 @@ CREATE TABLE IF NOT EXISTS users (
     is_admin BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS couriers (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -28,7 +24,6 @@ CREATE TABLE IF NOT EXISTS couriers (
     is_available BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS addresses (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) NOT NULL,
@@ -37,30 +32,26 @@ CREATE TABLE IF NOT EXISTS addresses (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (user_id, name)
 );
-
-
 CREATE TABLE IF NOT EXISTS categories (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) UNIQUE
 );
-
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     category_id INTEGER REFERENCES categories(id) NOT NULL,
     name VARCHAR(255),
-    price NUMERIC(10,2) NOT NULL CHECK (price >= 0),
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     quantity INTEGER NOT NULL CHECK (quantity >= 0),
     description VARCHAR(500),
     image_url TEXT,
-    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE
 );
-
 CREATE TABLE IF NOT EXISTS carts (
     id SERIAL PRIMARY KEY NOT NULL,
     user_id INTEGER REFERENCES users(id) NOT NULL UNIQUE,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS cart_items (
     id SERIAL PRIMARY KEY,
     cart_id INTEGER REFERENCES carts(id) NOT NULL,
@@ -68,24 +59,20 @@ CREATE TABLE IF NOT EXISTS cart_items (
     quantity INTEGER NOT NULL CHECK (quantity > 0),
     UNIQUE (cart_id, product_id)
 );
-
 CREATE TABLE IF NOT EXISTS orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER REFERENCES users(id) NOT NULL,
     address_id INTEGER REFERENCES addresses(id) ON DELETE RESTRICT NOT NULL,
-    courier_id  INTEGER REFERENCES couriers(id),
+    courier_id INTEGER REFERENCES couriers(id),
     status VARCHAR(20) NOT NULL DEFAULT 'preparing',
-    total NUMERIC(10,2) NOT NULL CHECK (total >= 0),
-    delivery_fee NUMERIC(10,2) NOT NULL CHECK (delivery_fee >= 0),
+    total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
+    delivery_fee NUMERIC(10, 2) NOT NULL CHECK (delivery_fee >= 0),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
-
 CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
     order_id INTEGER REFERENCES orders(id) NOT NULL,
     product_id INTEGER REFERENCES products(id) NOT NULL,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
-    price_at_purchase NUMERIC(10,2) NOT NULL CHECK (price_at_purchase >= 0)
+    price_at_purchase NUMERIC(10, 2) NOT NULL CHECK (price_at_purchase >= 0)
 );
-
-
