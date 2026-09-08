@@ -56,3 +56,17 @@ export const findCartItemInCart = async (itemId, cartId) => {
     );
     return result.rows[0] || null;
 };
+
+export const deleteCartItem = async (itemId, cartId) => {
+    const result = await pool.query(
+        'DELETE FROM cart_items WHERE id = $1 AND cart_id = $2 RETURNING id',
+        [itemId, cartId]
+    );
+    return result.rows[0] || null;
+};
+
+export const clearCart = async (cartId) => {
+    const result = await pool.query('DELETE FROM cart_items WHERE cart_id = $1 RETURNING id', [cartId]);
+    return result.rows.length;
+};
+

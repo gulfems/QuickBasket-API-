@@ -1,5 +1,5 @@
 import pool from '../db/index.js';
-import { findProduct, findOrCreateCart, findCartItem, insertCartItem, updateCartItemQuantity, findCartByUser, findCartItemInCart } from '../services/cartService.js';
+import { findProduct, findOrCreateCart, findCartItem, insertCartItem, updateCartItemQuantity, findCartByUser, findCartItemInCart, deleteCartItem, clearCart } from '../services/cartService.js';
 
 export const getCart = async (req, res) => {
     const userId = req.user.id;
@@ -100,3 +100,41 @@ export const updateCartItem = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error', status: 500 });
     }
 }
+
+export const removeCartItem = async (req, res) => {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    try {
+        const cart = await findCartByUser(userId);
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found', status: 404 });
+        }
+        const deleted = await deleteCartItem(id, cart.id);
+        if (!deleted) {
+            return res.status(404).json({ message: 'Item not found', status: 404 });
+        }
+        res.status(200).json({ message: 'Item removed from cart', status: 200 });
+    } catch (error) {
+        console.error('Could not delete cart item', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+export const emptyCart = async (req, res) => {
+    const userId = req.user.id;
+
+    try {
+        const cart = await findCartByUser(userId);
+        if (!cart) {
+            return res.status(404).json({ message: 'Cart not found', status: 404 });
+        }
+        const count = await clearCart(cart.id);
+        res.status(200).json({ message: 'Cart is clear', status: 200 });
+    } catch (error) {
+        console.error('Error clearing chart', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+
