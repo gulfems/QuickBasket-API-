@@ -67,3 +67,64 @@ export const createOrder = async (req, res) => {
         client.release();
     }
 }
+
+export const getMyOrders = async (req, res) => {
+    const userId = req.user.id;
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
+        return res.status(200).json({ orders: result.rows, status: 200 });
+    } catch (error) {
+        console.error('Could not monitor orders:', error);
+        return res.status(500).json({ message: 'Internal server error.', status: 500 });
+    }
+}
+
+export const getOrderById = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE id= $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Order not found', status: 404 });
+        }
+        const order = result.rows[0];
+        const isOwner = order.user_id === req.user.id;
+        const isCourier = order.courier_id === req.user.id && req.user.role === 'courier';
+        const isAdmin = req.user.is_admin;
+
+        if (!isOwner && !isCourier && !isAdmin) {
+            return res.status(403).json({ message: 'You are not authorized to view this order', status: 403 });
+        }
+        return res.status(200).json({ order });
+
+    } catch (error) {
+        console.error('Could not get the order', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+export const cancelOrder = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Order not found', status: 404 });
+        }
+        const order = result.rows[0];
+        if (order.user_id !== userId) {
+            return res.status(403).json({ message: 'You are not authorized to make this change', status: 403 });
+        }
+        if (order.status !== 'preparing') {
+            return res.status(400).json({ message: 'This order can no longer be cancelled', status: 400 });
+        }
+
+        await pool.query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', ['cancelled', id]);
+        return res.status(200).json({ message: 'Order cancelled', status: 200 });
+
+
+
+    } catch (error) {
+        console.error('Error cancelling order', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
