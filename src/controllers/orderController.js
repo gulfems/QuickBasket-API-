@@ -45,10 +45,20 @@ export const createOrder = async (req, res) => {
             await client.query('ROLLBACK');
             return res.status(400).json({ message: `Minimum order amount is ${MINIMUM_BASKET} TL. Your basket total is ${total.toFixed(2)} TL.`, status: 400 });
         }
-        return res.status(201).json({ total });
 
+        const orderResult = await client.query(
+            'INSERT INTO orders (user_id, address_id, total, delivery_fee) VALUES($1, $2, $3, $4) RETURNING *',
+            [userId, address_id, total, DELIVERY_FEE]
+        );
+
+        const order = orderResult.rows[0];
+        for (const item of items) {
+            await client.query('INSERT INTO order_items (order_id,product_id,quantity,price_at_purchase) VALUES ($1,$2,$3,$4)', [order.id, item.product_id, item.quantity, item.price]);
+            await client.query('UPDATE products SET quantity = quantity - $1 WHERE id = $2', [item.quantity, item.product_id]);
+        }
+        await client.query('DELETE FROM cart_items WHERE cart_id = (SELECT id FROM carts WHERE user_id = $1)', [userId]);
         await client.query('COMMIT');
-        return res.status(201).json({ message: 'ok', status: 201 })
+        return res.status(201).json({ message: 'Order placed:', order });
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error creating order', error);
