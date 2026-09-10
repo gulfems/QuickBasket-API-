@@ -6,16 +6,16 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "mocha --recursive --exit",
+    "test": "mocha",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "test": "mocha"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.22.2",
+    "express-rate-limit": "^8.7.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
     "swagger-jsdoc": "^6.3.0",
