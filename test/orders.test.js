@@ -6,6 +6,7 @@ describe('Order endpoints', () => {
     let token;
     let addressId;
     let orderId;
+    let otherToken;
     before(async () => {
         const res = await request(app)
             .post('/api/auth/login')
@@ -19,6 +20,10 @@ describe('Order endpoints', () => {
             .set('Authorization', `Bearer ${token}`)
             .send({ name: `Test Address ${Date.now()}`, address_text: 'Test Sokak No 1, Kadıköy, İstanbul' });
         addressId = addrRes.body.address.id;
+        const otherRes = await request(app)
+            .post('/api/auth/login')
+            .send({ email: 'testuser2@example.com', password: 'test1236' })
+        otherToken = otherRes.body.token;
     });
     it('rejects checkout with an empty cart', async () => {
         const res = await request(app)
@@ -38,7 +43,7 @@ describe('Order endpoints', () => {
         await request(app)
             .post('/api/cart/items')
             .set('Authorization', `Bearer ${token}`)
-            .send({ product_id: 1, quantity: 1 });
+            .send({ product_id: 62, quantity: 1 });
 
         const res = await request(app)
             .post('/api/orders')
@@ -47,16 +52,20 @@ describe('Order endpoints', () => {
 
         expect(res.status).to.equal(400);
     });
+
+
     it('places a valid order', async () => {
         await request(app)
             .post('/api/cart/items')
             .set('Authorization', `Bearer ${token}`)
-            .send({ product_id: 1, quantity: 20 });
+            .send({ product_id: 1, quantity: 2 });
 
         const res = await request(app)
             .post('/api/orders')
             .set('Authorization', `Bearer ${token}`)
             .send({ address_id: addressId });
+
+        if (res.status !== 201) console.log(res.body);
 
         expect(res.status).to.equal(201);
         expect(res.body.order.status).to.equal('preparing');
@@ -69,7 +78,6 @@ describe('Order endpoints', () => {
         expect(res.status).to.equal(200);
         expect(res.body.items.length).to.equal(0);
     });
-
     it('reduces product stock after checkout', async () => {
         const res = await request(app).get('/api/products/1');
         expect(res.status).to.equal(200);
@@ -104,5 +112,11 @@ describe('Order endpoints', () => {
             .put(`/api/orders/${orderId}/cancel`)
             .set('Authorization', `Bearer ${token}`);
         expect(res.status).to.equal(400);
+    });
+    it('refuses another user access to the order', async () => {
+        const res = await request(app)
+            .get(`/api/orders/${orderId}`)
+            .set('Authorization', `Bearer ${otherToken}`);
+        expect(res.status).to.equal(403);
     });
 });
