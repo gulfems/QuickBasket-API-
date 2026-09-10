@@ -128,3 +128,73 @@ export const cancelOrder = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error', status: 500 });
     }
 }
+
+//courier operations 
+
+export const getAvailableOrders = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE status = $1 AND courier_id IS NULL ORDER BY created_at ASC', ['preparing']);
+        return res.status(200).json({ orders: result.rows });
+    } catch (error) {
+        console.error('Could not get orders', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+export const claimOrder = async (req, res) => {
+    const { id } = req.params;
+    const courierId = req.user.id;
+
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Order not found', status: 404 });
+        }
+        const order = result.rows[0];
+        if (order.courier_id !== null) {
+            return res.status(409).json({ message: 'Order is claimed', status: 409 });
+        }
+        if (order.status !== 'preparing') {
+            return res.status(400).json({ message: 'Order cant be claimed', status: 400 });
+        }
+        const updated = await pool.query('UPDATE orders SET courier_id = $1, status = $2 WHERE id = $3 RETURNING *', [courierId, 'on_the_way', id]);
+        return res.status(200).json({ order: updated.rows[0] });
+    } catch (error) {
+        console.error('Cant claim order', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+export const deliverOrder = async (req, res) => {
+    const { id } = req.params;
+    const courierId = req.user.id;
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE id = $1', [id]);
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'Order not found', status: 404 });
+        }
+        const order = result.rows[0];
+        if (order.courier_id !== courierId) {
+            return res.status(403).json({ message: 'You are not authorized to make this execution', status: 403 });
+        }
+        if (order.status !== 'on_the_way') {
+            return res.status(400).json({ message: 'You cant change status', status: 400 });
+        }
+        const updated = await pool.query('UPDATE orders SET status = $1 WHERE id = $2 RETURNING *', ['delivered', id]);
+        return res.status(200).json({ order: updated.rows[0] });
+    } catch (error) {
+        console.error('Could not deliver: ', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
+
+export const getCourierOrders = async (req, res) => {
+    const courierId = req.user.id;
+    try {
+        const result = await pool.query('SELECT * FROM orders WHERE courier_id = $1 ORDER BY created_at DESC', [courierId]);
+        return res.status(200).json({ orders: result.rows });
+    } catch (error) {
+        console.error('Cant get orders', error);
+        return res.status(500).json({ message: 'Internal server error', status: 500 });
+    }
+}
