@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler.js";
 import authRoutes from "./routes/authRoutes.js";
 import courierRoutes from "./routes/courierRoutes.js";
@@ -14,7 +15,7 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
-
+app.use(helmet());
 
 //router
 app.get("/api/health", (req, res) => {

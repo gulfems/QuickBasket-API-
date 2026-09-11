@@ -11,11 +11,18 @@ export const registerUser = async (req, res) => {
         return res.status(400).json({ message: 'Email, password, and phone are required', status: 400 });
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format', status: 400 });
+    };
+    
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (existingUser.rows.length > 0) {
             return res.status(409).json({ message: 'User already exists', status: 409 });
         }
+
+     
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
         const newUser = await pool.query(

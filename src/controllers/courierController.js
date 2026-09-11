@@ -9,7 +9,12 @@ export const registerCourier = async (req, res) => {
 
     if (!email || !password || !phone) {
         return res.status(400).json({ message: 'Email, password, and phone are required', status: 400 });
-    }
+    };
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ message: 'Invalid email format', status: 400 });
+    };
 
     try {
         const existingCourrier = await pool.query('SELECT * FROM couriers WHERE email = $1', [email]);
