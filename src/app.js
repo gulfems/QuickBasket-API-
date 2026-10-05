@@ -16,7 +16,7 @@ import { swaggerSpec } from "./config/swagger.js";
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors()); //you need to restrict this before deploy
 app.use(helmet());
 
 
