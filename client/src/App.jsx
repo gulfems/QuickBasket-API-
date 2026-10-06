@@ -5,10 +5,12 @@ import { Register } from './pages/Register.jsx';
 import { Home } from './pages/Home.jsx';
 import { Products } from './pages/Products.jsx';
 import { ProductDetail } from './pages/ProductDetail.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
 
 function App() {
   return (
     <Router>
+      <AuthProvider>
       <Routes>
         <Route element={<Layout />}>
           <Route path="/" element={<Home />} />
@@ -17,7 +19,8 @@ function App() {
           <Route path="/products" element={<Products />} />
           <Route path="/products/:id" element={<ProductDetail/>}/>
         </Route>
-      </Routes>
+        </Routes>
+        </AuthProvider>
     </Router>
   );
 }
