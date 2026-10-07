@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-
+import { useCart } from '../context/CartContext.jsx';
 
 export const Products = () => {
     const [products, setProducts] = useState([]);
@@ -12,7 +12,7 @@ export const Products = () => {
 
     const category = searchParams.get('category');
     const search = searchParams.get('search');
-
+    const { addItem } = useCart();
 
     useEffect(() => {
         const params = new URLSearchParams();
@@ -75,6 +75,7 @@ export const Products = () => {
                 <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4">
                     {products.map((product) => (
                         <li key={product.id}>
+                            <button onClick={()=>addItem(product.id,1)}>+</button>
                             <Link
                                 to={`/products/${product.id}`}
                                 className="block border border-border rounded-md p-6">
