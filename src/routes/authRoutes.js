@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, loginUser, getMe } from '../controllers/authController.js';
+import { registerUser, loginUser, getMe, googleLogin } from '../controllers/authController.js';
 import { requireAuth } from '../middleware/requireAuth.js';
 import { requireUser } from '../middleware/requireUser.js';
 import { authLimiter } from '../middleware/rateLimiter.js';
@@ -66,6 +66,7 @@ router.post('/register', authLimiter, registerUser);
  *         description: Email and passwords are required
  */
 router.post('/login', authLimiter, loginUser);
+router.post('/google', authLimiter, googleLogin);
 /**
  * @swagger
  * /api/auth/me:
