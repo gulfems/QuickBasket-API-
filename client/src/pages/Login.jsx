@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import { GoogleLogin } from '@react-oauth/google';
 
 export const Login = () => {
 
@@ -39,7 +40,33 @@ export const Login = () => {
         }
     };
 
+    const handleGoogle = async (credentialResponse) => {
+        setError(null);
+        setLoading(true);
 
+        const { credential } = credentialResponse;
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ credential }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            login(data.token);
+            navigate('/');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+
+    };
 
 
 
@@ -79,6 +106,10 @@ export const Login = () => {
                         {loading ? 'Logging in...' : 'Login'}
                     </button>
                 </form>
+                <GoogleLogin
+                    onSuccess={handleGoogle}
+                    onError={() => setError('Google sign-in failed')}
+                />
                 <p className="font-body text-sm text-muted text-center mt-8">
                     Need an account?{' '}
                     <Link to="/register" className="text-periwinkle hover:text-ice transition-colors">

@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import { GoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../context/AuthContext.jsx';
+
 
 export const Register = () => {
     const [email, setEmail] = useState("");
@@ -8,7 +11,7 @@ export const Register = () => {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-
+    const { login } = useAuth();
 
     const handleRegister = async (e) => {
         e.preventDefault();
@@ -35,6 +38,35 @@ export const Register = () => {
             setLoading(false);
         }
     };
+
+    const handleGoogle = async (credentialResponse) => {
+        setError(null);
+        setLoading(true);
+
+        const { credential } = credentialResponse;
+        try {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ credential }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message);
+            }
+            login(data.token);
+            navigate('/');
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setLoading(false);
+        }
+
+    };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center px-6">
@@ -80,6 +112,10 @@ export const Register = () => {
                         className="mt-2 text-sm uppercase tracking-wider border border-border rounded-md px-6 py-3">
                         {loading ? 'Registering' : 'Register'}
                     </button>
+                    <GoogleLogin
+                        onSuccess={handleGoogle}
+                        onError={() => setError('Google sign-in failed')}
+                    />
                     <p className="font-body text-sm text-muted text-center mt-8">
                         Already have an account?{' '}
                         <Link to="/login" className="text-periwinkle hover:text-ice transition-colors">
