@@ -1,4 +1,5 @@
 import { useCart } from '../context/CartContext';
+import { Link } from 'react-router-dom';
 
 export const Cart = () => {
     const { items, loading, error, updateItem, removeItem } = useCart();
@@ -42,6 +43,7 @@ export const Cart = () => {
                 </ul>
 
                 <p className="mt-8 text-lg">Total: {total.toFixed(2)} TL</p>
+                <Link to="/checkout">Go to checkout</Link>
             </main>
         </div>
     );

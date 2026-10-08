@@ -96,7 +96,7 @@ export const CartProvider = ({ children }) => {
         await fetchCart();
     };
 
-    return (<CartContext.Provider value={{ items, loading, error, addItem, updateItem, removeItem, clearCart }}>
+    return (<CartContext.Provider value={{ items, loading, error, addItem, updateItem, removeItem, clearCart, fetchCart }}>
 
         {children}
     </CartContext.Provider>);
