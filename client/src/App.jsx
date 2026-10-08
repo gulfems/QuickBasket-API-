@@ -12,6 +12,7 @@ import { Cart } from './pages/Cart.jsx';
 import { Account } from './pages/Account.jsx';
 import { Checkout } from './pages/Checkout.jsx';
 import { Orders } from './pages/Orders.jsx';
+import { OrderDetail } from './pages/OrderDetail.jsx';
 
 function App() {
   return (
@@ -28,7 +29,8 @@ function App() {
               <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
               <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
               <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-              
+              <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+              <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
             </Route>
           </Routes>
         </CartProvider>
