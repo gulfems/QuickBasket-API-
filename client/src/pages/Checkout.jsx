@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext.jsx';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { PaymentForm } from '../components/PaymentForm.jsx';
+import { Link } from 'react-router-dom';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
@@ -63,70 +64,101 @@ export const Checkout = () => {
         fetchPayment();
     }, [token]);
 
+    if (loading) return (<p className="max-w-6xl mx-auto px-6 py-12 text-muted">Loading checkout…</p>);
+    if (error) return (<p className="max-w-6xl mx-auto px-6 py-12 text-red-600">{error}</p>);
 
-
-
-    if (loading) return (<p>Loading...</p>);
-    if (error) return (<p>{error}</p>);
     const DELIVERY_FEE = 45;
     const subtotal = items.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0);
 
+    const appearance = {
+        theme: 'stripe',
+        variables: {
+            colorPrimary: '#141414',
+            colorText: '#141414',
+            borderRadius: '12px',
+            fontFamily: 'Inter, sans-serif',
+        },
+    };
+
     return (
         <div className="min-h-screen">
-            <main className="mx-auto px-6 py-24 max-w-2xl">
-                <h1 className="text-4xl tracking-tight">Checkout</h1>
+            <main className="max-w-6xl mx-auto px-6 py-12">
+                <h1 className="font-display text-3xl">Checkout</h1>
 
-                <section className="mt-8">
-                    <h2 className="text-lg mb-3">Deliver to</h2>
-                    <select
-                        value={addressId}
-                        onChange={(e) => setAddressId(e.target.value)}
-                        className="border rounded-md px-4 py-3 w-full">
-                        <option value="">Choose an address</option>
-                        {addresses.map((a) => (
-                            <option key={a.id} value={a.id}>
-                                {a.name} - {a.address_text}
-                            </option>
-                        ))}
-                    </select>
-                </section>
+                <div className="mt-8 grid md:grid-cols-3 gap-8 items-start">
 
-                <section className="mt-8">
-                    <h2 className="text-lg mb-2">
-                        Your order
-                    </h2>
-                    <ul className="flex flex-col gap-2">
-                        {items.map((item) => (
-                            <li key={item.id} className="flex justify-between">
-                                <span>{item.quantity} x {item.name}</span>
-                                <span>{(Number(item.price) * item.quantity).toFixed(2)} TL</span>
-                            </li>
-                        ))}
-                    </ul>
-                </section>
+                    <div className="md:col-span-2 flex flex-col gap-6">
 
-                <section className="mt-8 border-t pt-4 flex flex-col gap-1">
-                    <div className="flex justify-between">
-                        <span>Subtotal</span>
-                        <span>{subtotal.toFixed(2)} TL</span>
+                        <section className="bg-white border border-line rounded-2xl p-6">
+                            <h2 className="font-display text-xl">Deliver to</h2>
+                            {addresses.length === 0 ? (
+                                <p className="mt-3 text-muted">
+                                    You have no saved addresses.{' '}
+                                    <Link to="/account" className="text-ink font-semibold underline">Add one</Link>
+                                </p>
+                            ) : (
+                                <select
+                                    value={addressId}
+                                    onChange={(e) => setAddressId(e.target.value)}
+                                    className="mt-3 w-full rounded-xl border border-line px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-volt">
+                                    <option value="">Choose an address</option>
+                                    {addresses.map((a) => (
+                                        <option key={a.id} value={a.id}>
+                                            {a.name} - {a.address_text}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </section>
+
+                        <section className="bg-white border border-line rounded-2xl p-6">
+                            <h2 className="font-display text-xl mb-4">Payment</h2>
+                            {clientSecret ? (
+                                <Elements stripe={stripePromise} options={{ clientSecret, appearance }}>
+                                    <PaymentForm addressId={addressId} />
+                                </Elements>
+                            ) : (
+                                <p className="text-muted">Loading payment…</p>
+                            )}
+                        </section>
+
                     </div>
-                    <div className="flex justify-between">
-                        <span>Delivery</span>
-                        <span>{DELIVERY_FEE.toFixed(2)} TL</span>
+
+                    <div className="bg-white border border-line rounded-2xl p-6 md:sticky md:top-28">
+                        <h2 className="font-display text-xl">Your order</h2>
+
+                        <ul className="mt-4 flex flex-col gap-3">
+                            {items.map((item) => (
+                                <li key={item.id} className="flex items-center gap-3">
+                                    <img src={item.image_url} alt={item.name} className="h-12 w-12 object-contain" />
+                                    <span className="flex-1 min-w-0 text-sm line-clamp-2">
+                                        {item.quantity} × {item.name}
+                                    </span>
+                                    <span className="text-sm font-medium">
+                                        {(Number(item.price) * item.quantity).toFixed(2)} TL
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-6 pt-4 border-t border-line flex justify-between">
+                            <span>Subtotal</span>
+                            <span>{subtotal.toFixed(2)} TL</span>
+                        </div>
+                        <div className="mt-2 flex justify-between">
+                            <span>Delivery</span>
+                            <span>{DELIVERY_FEE.toFixed(2)} TL</span>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-line flex justify-between text-lg font-semibold">
+                            <span>Total</span>
+                            <span>{(subtotal + DELIVERY_FEE).toFixed(2)} TL</span>
+                        </div>
                     </div>
-                    <div className="flex justify-between text-lg">
-                        <span>Total</span>
-                        <span>{(subtotal + DELIVERY_FEE).toFixed(2)} TL</span>
-                    </div>
-                    {clientSecret ? (
-                        <Elements stripe={stripePromise} options={{ clientSecret }}>
-                            <PaymentForm addressId={addressId} />
-                        </Elements>
-                    ) : (
-                        <p>Loading payment...</p>
-                    )}
-                </section>
+
+                </div>
             </main>
         </div>
     );
 }
+
+

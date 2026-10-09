@@ -58,14 +58,17 @@ export const PaymentForm = ({ addressId }) => {
     }
 
     return (
-        <>
-            <form onSubmit={handleSubmit}>
-                <PaymentElement />
-                <button type="submit" disabled={!stripe || processing}>
-                    {processing ? "Processing..." : "Pay and place order"}
-                </button>
-                {error && <p>{error}</p>}
-            </form>
-        </>
+        <form onSubmit={handleSubmit}>
+            <PaymentElement />
+            <button
+                type="submit"
+                disabled={!stripe || processing}
+                className="mt-6 w-full bg-volt hover:bg-volt-dark rounded-full px-6 py-4 font-semibold disabled:opacity-40 disabled:cursor-not-allowed">
+                {processing ? 'Processing…' : 'Pay and place order'}
+            </button>
+            {error && (
+                <p className="mt-3 text-sm text-red-600">{error}</p>
+            )}
+        </form>
     );
 }
