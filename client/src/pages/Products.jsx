@@ -54,44 +54,51 @@ export const Products = () => {
 
     return (
         <div className="min-h-screen">
-            <main className="mx-auto px-6 py-24">
+            <main className="max-w-6xl mx-auto px-6 py-12">
 
-                <div className="flex items-center justify-center gap-24">
-                    <div>
-                        <h1 className="text-4xl tracking-tight">
-                            Products
-                        </h1>
-                    </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <h1 className="font-display text-3xl">Products</h1>
+                    {category && (
+                        <Link
+                            to="/products"
+                            className="text-sm font-medium rounded-full border border-line px-4 py-2 hover:bg-volt hover:border-volt">
+                            ← All products
+                        </Link>
+                    )}
+                    <input
+                        type="text"
+                        value={search || ''}
+                        onChange={(e) => setSearchParams({ search: e.target.value })}
+                        placeholder="Search products"
+                        className="w-full sm:max-w-sm rounded-full border border-line px-5 py-3 focus:outline-none focus:ring-2 focus:ring-volt" />
                 </div>
 
-                <input
-                    type="text"
-                    value={search || ''}
-                    onChange={(e) => setSearchParams({ search: e.target.value })}
-                    placeholder="Search products"
-                    className="border rounded-md px-4 py-2" />
-
-
-                <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-4">
+                <ul className="mt-8 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                     {products.map((product) => (
-                        <li key={product.id}>
-                            <button onClick={()=>addItem(product.id,1)}>+</button>
+                        <li key={product.id} className="relative">
                             <Link
                                 to={`/products/${product.id}`}
-                                className="block border border-border rounded-md p-6">
-                                <div className="flex items-baseline justify-between gap-4">
-                                    <h2 className="text-base">
-                                        {product.name}
-                                    </h2>
-                                </div>
+                                className="block bg-white border border-line rounded-2xl p-3 hover:shadow-md transition">
+                                <img
+                                    src={product.image_url}
+                                    alt={product.name}
+                                    className="w-full aspect-square object-contain" />
+                                <p className="mt-3 text-sm font-medium line-clamp-2">{product.name}</p>
+                                <p className="mt-1 font-semibold">{Number(product.price).toFixed(2)} TL</p>
                             </Link>
+                            <button
+                                onClick={() => addItem(product.id, 1)}
+                                className="absolute top-3 right-3 h-9 w-9 rounded-full bg-volt hover:bg-volt-dark text-xl font-semibold shadow-sm">
+                                +
+                            </button>
                         </li>
                     ))}
                 </ul>
+
                 {hasMore && (
                     <button
                         onClick={() => setOffset(offset + 20)}
-                        className="mt-8 border rounded-md px-6 py-2">
+                        className="mt-10 mx-auto block bg-ink text-volt rounded-full px-6 py-3 font-semibold hover:bg-ink/85">
                         Load more
                     </button>
                 )}
