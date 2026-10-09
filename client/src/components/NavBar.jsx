@@ -18,6 +18,12 @@ export const NavBar = () => {
 
                 {user ? (
                     <div className="flex items-center gap-6">
+                        <NavLink to="/orders" className="text-sm font-medium text-ink/70 hover:text-ink">
+                            Orders
+                        </NavLink>
+                        <NavLink to="/account" className="text-sm font-medium text-ink/70 hover:text-ink">
+                            Account
+                        </NavLink>
                         <span className="hidden sm:inline text-sm text-ink/70">{user.email}</span>
                         <button onClick={logout} className="text-sm font-medium text-ink/70 hover:text-ink">
                             Logout
