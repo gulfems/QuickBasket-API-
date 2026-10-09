@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+@theme {
+    --color-volt: #D4FF3A;
+    --color-volt-dark: #BDE620;
+    --color-lemon: #FFF27A;
+    --color-ink: #141414;
+    --color-muted: #6B6B6B;
+    --color-line: #EEEEEE;
+
+    --font-display: "Righteous", sans-serif;
+    --font-sans: "Inter", sans-serif;
+}
+
+body {
+    @apply bg-white text-ink font-sans;
+}
