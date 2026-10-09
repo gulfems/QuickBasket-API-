@@ -69,7 +69,8 @@ CREATE TABLE IF NOT EXISTS orders (
     total NUMERIC(10, 2) NOT NULL CHECK (total >= 0),
     delivery_fee NUMERIC(10, 2) NOT NULL CHECK (delivery_fee >= 0),
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
-    payment_status VARCHAR(20) NOT NULL DEFAULT 'unpaid' stripe_payment_intent_id VARCHAR(255) UNIQUE
+    payment_status VARCHAR(20) NOT NULL DEFAULT 'unpaid',
+    stripe_payment_intent_id VARCHAR(255) UNIQUE
 );
 CREATE TABLE IF NOT EXISTS order_items (
     id SERIAL PRIMARY KEY,
