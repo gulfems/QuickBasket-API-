@@ -1,20 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
-import { useNavigate } from 'react-router-dom';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import { PaymentForm } from '../components/PaymentForm.jsx';
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 export const Checkout = () => {
     const { token } = useAuth();
-    const { items, fetchCart } = useCart();
-    const navigate = useNavigate();
+    const { items } = useCart();
 
     const [addresses, setAddresses] = useState([]);
     const [addressId, setAddressId] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [placing, setPlacing] = useState(false);
-    const [orderError, setOrderError] = useState(null);
+
+
+    const [clientSecret, setClientSecret] = useState(null);
 
     useEffect(() => {
 
@@ -38,31 +41,29 @@ export const Checkout = () => {
         fetchAddresses();
     }, [token]);
 
-
-    const handlePlaceOrder = async () => {
-        setOrderError(null);
-        setPlacing(true);
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ address_id: Number(addressId) })
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message);
+    useEffect(() => {
+        const fetchPayment = async () => {
+            try {
+                const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-intent`, {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    setError(data.message);
+                    return;
+                }
+                setClientSecret(data.clientSecret);
+            } catch (error) {
+                setError(error.message);
+            } finally {
+                setLoading(false);
             }
-            fetchCart();
-            navigate(`/orders/${data.order.id}`);
-        } catch (error) {
-            setOrderError(error.message);
-        } finally {
-            setPlacing(false);
         }
-    }
+        fetchPayment();
+    }, [token]);
+
+
 
 
     if (loading) return (<p>Loading...</p>);
@@ -117,18 +118,13 @@ export const Checkout = () => {
                         <span>Total</span>
                         <span>{(subtotal + DELIVERY_FEE).toFixed(2)} TL</span>
                     </div>
-                    {orderError && (
-                        <p className="mt-6 border border-red-900 bg-red-950/40 text-red-300 rounded-md px-4 py-3 text-sm">
-                            {orderError}
-                        </p>
+                    {clientSecret ? (
+                        <Elements stripe={stripePromise} options={{ clientSecret }}>
+                            <PaymentForm addressId={addressId} />
+                        </Elements>
+                    ) : (
+                        <p>Loading payment...</p>
                     )}
-
-                    <button
-                        onClick={handlePlaceOrder}
-                        disabled={!addressId || placing}
-                        className="mt-6 w-full border rounded-md px-6 py-3 disabled:opacity-50">
-                        {placing ? 'Placing order...' : 'Place order'}
-                    </button>
                 </section>
             </main>
         </div>
