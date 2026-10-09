@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
+const heroPhotos = ['/products/7.png', '/products/13.png', '/products/31.png', '/products/58.png', '/products/26.png', '/products/41.png'];
+
 export const Home = () => {
 
     const [categories, setCategories] = useState([]);
@@ -33,6 +35,24 @@ export const Home = () => {
 
     return (
         <div className="min-h-screen">
+            <section className="bg-volt pt-8 pb-40">
+                <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h1 className="font-display text-5xl md:text-6xl leading-tight mt-30 ml-17">Life gave you a basket.</h1>
+                        <p className="ml-17 mt-4 text-lg text-ink/70 max-w-md">Fill it with 90+ fresh pics and we'll bring it over.</p>
+                        <Link to="/products" className="inline-block mt-8 bg-ink text-volt rounded-full px-6 py-3 font-semibold ml-17 hover:bg-ink/85">Start shopping</Link>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4">
+                        {heroPhotos.map((src, i) => (
+                            <div
+                                key={src}
+                                className={`aspect-square rounded-2xl p-3 ${i % 2 === 0 ? 'bg-lemon' : 'bg-white'} ${i % 3 === 1 ? '-translate-y-4' : ''}`}>
+                                <img src={src} alt="" className="w-full h-full object-contain mix-blend-multiply" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
             <main className="mx-auto px-6 py-24">
 
                 <div className="flex items-center justify-center gap-20">
