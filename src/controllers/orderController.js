@@ -130,7 +130,14 @@ export const getOrderById = async (req, res) => {
         if (!isOwner && !isCourier && !isAdmin) {
             return res.status(403).json({ message: 'You are not authorized to view this order', status: 403 });
         }
-        return res.status(200).json({ order });
+        const itemsResult = await pool.query(
+            `SELECT oi.product_id, oi.quantity, oi.price_at_purchase, p.name, p.image_url
+                FROM order_items oi
+                JOIN products p ON p.id = oi.product_id
+                WHERE oi.order_id = $1`,
+            [order.id]
+        );
+        return res.status(200).json({ order: { ...order, items: itemsResult.rows } });
 
     } catch (error) {
         console.error('Could not get the order', error);

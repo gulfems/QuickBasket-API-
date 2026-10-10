@@ -75,51 +75,69 @@ export const Account = () => {
         }
     }
 
-    if (loading) return (<p>Loading addresses</p>);
-    if (error) return (<p>{error}</p>);
+    if (loading) return (<p className="max-w-6xl mx-auto px-6 py-12 text-muted">Loading addresses…</p>);
+    if (error) return (<p className="max-w-6xl mx-auto px-6 py-12 text-red-600">{error}</p>);
 
     return (
-        <div className="min-h-screen">
-            <main className="mx-auto px-6 py-24">
-                <h1 className="text-4xl tracking-tight">Your addresses</h1>
+        <main className="max-w-6xl mx-auto px-6 py-12">
+            <h1 className="font-display text-3xl">Your account</h1>
 
-                <form onSubmit={handleAddress} className="mt-8 flex flex-col gap-4 max-w-md">
-                    {formError && (
-                        <p className="border border-red-900 bg-red-950/40 text-red-300 rounded-md px-4 py-3 text-sm">
-                            {formError}
-                        </p>
+            <div className="mt-8 grid md:grid-cols-3 gap-8 items-start">
+
+                <section className="md:col-span-2">
+                    <h2 className="font-display text-xl">Saved addresses</h2>
+
+                    {addresses.length === 0 ? (
+                        <p className="mt-3 text-muted">No addresses yet. Add your first one.</p>
+                    ) : (
+                        <ul className="mt-4 flex flex-col gap-3">
+                            {addresses.map((address) => (
+                                <li key={address.id} className="flex items-start justify-between gap-4 bg-white border border-line rounded-2xl p-5">
+                                    <div className="min-w-0">
+                                        <p className="font-semibold">{address.name}</p>
+                                        <p className="mt-1 text-sm text-muted">{address.address_text}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => deleteAddress(address.id)}
+                                        className="text-sm text-muted hover:text-red-600">
+                                        Delete
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
                     )}
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Name (Home, Work…)"
-                        required
-                        className="border rounded-md px-4 py-3"
-                    />
-                    <input
-                        type="text"
-                        value={addressText}
-                        onChange={(e) => setAddressText(e.target.value)}
-                        placeholder="Full address"
-                        required
-                        className="border rounded-md px-4 py-3"
-                    />
-                    <button type="submit" className="border rounded-md px-6 py-3">
-                        Add address
-                    </button>
-                </form>
+                </section>
 
-                <ul className="mt-8 flex flex-col gap-4">
-                    {addresses.map((address) => (
-                        <li key={address.id} className="border rounded-md p-4">
-                            <h2 className="text-lg">{address.name}</h2>
-                            <p>{address.address_text}</p>
-                            <button onClick={() => deleteAddress(address.id)}>X</button>
-                        </li>
-                    ))}
-                </ul>
-            </main>
-        </div>
+                <section className="bg-white border border-line rounded-2xl p-6 md:sticky md:top-28">
+                    <h2 className="font-display text-xl">Add an address</h2>
+
+                    <form onSubmit={handleAddress} className="mt-4 flex flex-col gap-3">
+                        <input
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            placeholder="Name (Home, Work…)"
+                            required
+                            className="rounded-xl border border-line px-4 py-3 focus:outline-none focus:ring-2 focus:ring-volt"
+                        />
+                        <textarea
+                            value={addressText}
+                            onChange={(e) => setAddressText(e.target.value)}
+                            placeholder="Full address"
+                            required
+                            rows={3}
+                            className="rounded-xl border border-line px-4 py-3 resize-none focus:outline-none focus:ring-2 focus:ring-volt"
+                        />
+                        {formError && <p className="text-sm text-red-600">{formError}</p>}
+                        <button
+                            type="submit"
+                            className="mt-2 bg-volt hover:bg-volt-dark rounded-full px-6 py-3 font-semibold">
+                            Add address
+                        </button>
+                    </form>
+                </section>
+
+            </div>
+        </main>
     );
 }
